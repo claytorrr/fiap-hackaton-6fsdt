@@ -44,7 +44,7 @@ type FormValues = {
   grade_level: string;
   topic: string;
   duration_minutes: number;
-  status: "draft" | "published" | "archived";
+  status: "draft" | "archived";
   learning_objectives_raw: string;
   bncc_skills_raw: string;
   prerequisites: string;
@@ -54,7 +54,6 @@ type FormValues = {
 
 const STATUS_OPTIONS: Array<{ value: FormValues["status"]; label: string }> = [
   { value: "draft", label: "Rascunho" },
-  { value: "published", label: "Publicado" },
   { value: "archived", label: "Arquivado" },
 ];
 
@@ -73,7 +72,12 @@ export function EditPlanForm({ plan }: EditPlanFormProps) {
       grade_level: plan.grade_level,
       topic: plan.topic,
       duration_minutes: plan.duration_minutes,
-      status: plan.status as FormValues["status"],
+      // Coerce: se o plano vier com um status legado (ex.: 'published' de dados
+      // antigos), forcamos 'draft' para nao gerar select vazio.
+      status:
+        plan.status === "archived"
+          ? "archived"
+          : ("draft" as FormValues["status"]),
       learning_objectives_raw: plan.learning_objectives.join("\n"),
       bncc_skills_raw: plan.bncc_skills.join(", "),
       prerequisites: plan.prerequisites,

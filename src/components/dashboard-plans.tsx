@@ -32,7 +32,9 @@ interface DashboardPlansProps {
   plans: PlanRow[];
 }
 
-const STATUS_OPTIONS = ["draft", "published", "archived"] as const;
+// Publicado nao aparece na UI (nao ha compartilhamento entre professores no MVP).
+// A opcao permanece no banco pra nao quebrar dados legados.
+const STATUS_OPTIONS = ["draft", "archived"] as const;
 
 /**
  * Dashboard cliente: busca por texto + filtros por status/disciplina

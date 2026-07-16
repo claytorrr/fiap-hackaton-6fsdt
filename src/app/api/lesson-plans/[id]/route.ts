@@ -90,13 +90,21 @@ export async function PATCH(
     return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   }
 
-  const parsed = updateLessonPlanSchema.safeParse(payload);
+  const parsed = updateLessonPlanSchema.partial().safeParse(payload);
   if (!parsed.success) {
     return NextResponse.json(
       {
         error: "Payload inválido",
         issues: parsed.error.flatten().fieldErrors,
       },
+      { status: 400 },
+    );
+  }
+
+  // Impede PATCH vazio (nenhum campo enviado)
+  if (Object.keys(parsed.data).length === 0) {
+    return NextResponse.json(
+      { error: "Nenhum campo para atualizar" },
       { status: 400 },
     );
   }

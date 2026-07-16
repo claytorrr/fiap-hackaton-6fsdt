@@ -35,6 +35,7 @@ import type { LessonPlanContent } from "@/lib/supabase/types";
 import { DeletePlanButton } from "@/components/delete-plan-button";
 import { DuplicatePlanButton } from "@/components/duplicate-plan-button";
 import { PrintPlanButton } from "@/components/print-plan-button";
+import { ArchivePlanButton } from "@/components/archive-plan-button";
 
 type Section = {
   duration_minutes?: number;
@@ -109,6 +110,7 @@ export default async function LessonPlanDetailPage({ params }: PageProps) {
           <Badge>{STATUS_LABELS[plan.status] ?? plan.status}</Badge>
           <PrintPlanButton />
           <DuplicatePlanButton planId={plan.id} />
+          <ArchivePlanButton planId={plan.id} currentStatus={plan.status} />
           <Button asChild variant="outline" size="sm" className="gap-2">
             <Link href={`/app/planos/${plan.id}/editar`}>
               <Pencil className="h-4 w-4" aria-hidden />

@@ -132,7 +132,7 @@ export const updateLessonPlanSchema = z.object({
     .int()
     .min(15, "Duração mínima: 15 min")
     .max(300, "Duração máxima: 300 min"),
-  status: z.enum(["draft", "published", "archived"]),
+  status: z.enum(["draft", "archived"]),
   learning_objectives: z
     .array(z.string().min(1))
     .min(1, "Adicione ao menos 1 objetivo")
