@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Sparkles } from "lucide-react";
+import { BookOpen, Plus, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,20 +8,47 @@ import {
 } from "@/components/ui/card";
 import { PlanCard } from "@/components/plan-card";
 
+type PlanRow = {
+  id: string;
+  title: string;
+  discipline: string;
+  grade_level: string;
+  duration_minutes: number;
+  status: string;
+  created_at: string;
+};
+
 /**
- * Dashboard: lista os planos do professor logado e oferece o CTA
- * para gerar um novo plano com IA.
+ * Dashboard: lista os planos do professor logado agrupados por
+ * disciplina (seções ordenadas alfabeticamente, planos dentro de
+ * cada seção mantêm a ordem cronológica reversa vinda do banco).
  */
 export default async function DashboardPage() {
   const supabase = await createClient();
 
   const { data: plans } = await supabase
     .from("lesson_plans")
-    .select("id, title, discipline, grade_level, duration_minutes, status, created_at")
+    .select(
+      "id, title, discipline, grade_level, duration_minutes, status, created_at",
+    )
     .order("created_at", { ascending: false })
-    .limit(20);
+    .limit(100);
 
   const hasPlans = plans && plans.length > 0;
+
+  // Agrupa por disciplina preservando a ordem cronológica (mais recente
+  // primeiro) dentro de cada grupo. Depois ordena as disciplinas alfabeticamente.
+  const groups = new Map<string, PlanRow[]>();
+  if (plans) {
+    for (const plan of plans as PlanRow[]) {
+      const key = plan.discipline || "Sem disciplina";
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(plan);
+    }
+  }
+  const sortedDisciplines = Array.from(groups.keys()).sort((a, b) =>
+    a.localeCompare(b, "pt-BR"),
+  );
 
   return (
     <div className="space-y-8">
@@ -29,7 +56,9 @@ export default async function DashboardPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Meus planos</h1>
           <p className="text-muted-foreground">
-            Gere, edite e exporte planos de aula alinhados à BNCC.
+            {hasPlans
+              ? `${plans!.length} ${plans!.length === 1 ? "plano" : "planos"} em ${sortedDisciplines.length} ${sortedDisciplines.length === 1 ? "disciplina" : "disciplinas"}`
+              : "Gere, edite e exporte planos de aula alinhados à BNCC."}
           </p>
         </div>
         <Button asChild size="lg" className="gap-2">
@@ -64,10 +93,31 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {plans.map((plan) => (
-            <PlanCard key={plan.id} plan={plan} />
-          ))}
+        <div className="space-y-10">
+          {sortedDisciplines.map((discipline) => {
+            const items = groups.get(discipline)!;
+            return (
+              <section key={discipline} className="space-y-4">
+                <div className="flex items-center gap-3 border-b pb-2">
+                  <BookOpen
+                    className="h-5 w-5 text-primary"
+                    aria-hidden
+                  />
+                  <h2 className="text-xl font-semibold tracking-tight">
+                    {discipline}
+                  </h2>
+                  <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                    {items.length}
+                  </span>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {items.map((plan) => (
+                    <PlanCard key={plan.id} plan={plan} />
+                  ))}
+                </div>
+              </section>
+            );
+          })}
         </div>
       )}
     </div>
