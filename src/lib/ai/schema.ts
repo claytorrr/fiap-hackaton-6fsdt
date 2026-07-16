@@ -113,3 +113,34 @@ export const lessonPlanAiResponseSchema = z.object({
 });
 
 export type LessonPlanAiResponse = z.infer<typeof lessonPlanAiResponseSchema>;
+
+// ---------------------------------------------------------------------------
+// Schema de edição: campos do plano que o professor pode alterar depois
+// (não expõe o content JSON aninhado nem activities/assessments — esses
+// teriam telas próprias).
+// ---------------------------------------------------------------------------
+
+export const updateLessonPlanSchema = z.object({
+  title: z.string().min(3, "Título muito curto").max(200),
+  discipline: z.string().min(1, "Selecione a disciplina").max(80),
+  grade_level: z.enum(gradeValues, {
+    errorMap: () => ({ message: "Selecione o ano/série" }),
+  }),
+  topic: z.string().min(5, "Descreva o tema").max(300),
+  duration_minutes: z
+    .number({ invalid_type_error: "Duração deve ser um número" })
+    .int()
+    .min(15, "Duração mínima: 15 min")
+    .max(300, "Duração máxima: 300 min"),
+  status: z.enum(["draft", "published", "archived"]),
+  learning_objectives: z
+    .array(z.string().min(1))
+    .min(1, "Adicione ao menos 1 objetivo")
+    .max(15),
+  bncc_skills: z.array(z.string().min(1)).max(20).default([]),
+  prerequisites: z.string().max(2000).default(""),
+  methodology: z.string().max(4000).default(""),
+  resources: z.array(z.string().min(1)).max(30).default([]),
+});
+
+export type UpdateLessonPlanInput = z.infer<typeof updateLessonPlanSchema>;

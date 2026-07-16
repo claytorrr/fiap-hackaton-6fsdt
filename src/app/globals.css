@@ -58,3 +58,73 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
+
+/* =========================================================================
+ * IMPRESSÃO / EXPORT PDF
+ * O botão "PDF" chama window.print(). Aqui deixamos a página impressa
+ * com layout limpo: sem header do app, sem botões, cards em preto e
+ * branco, quebras de página inteligentes. O usuário escolhe "Salvar como
+ * PDF" no diálogo do navegador.
+ * ========================================================================= */
+@media print {
+  /* Reset de cores e fundos para tinta */
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 11pt;
+  }
+
+  /* Esconde qualquer elemento marcado como não-imprimível
+     (header do app, botões, toaster, etc.) */
+  .no-print,
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+
+  /* Remove backgrounds/sombras do wrapper do app */
+  .bg-muted\/20,
+  .bg-muted,
+  main {
+    background: #fff !important;
+    padding: 0 !important;
+  }
+
+  /* Cards ficam com borda leve e evitam quebrar no meio */
+  .print-area .rounded-xl,
+  .print-area .rounded-lg,
+  .print-area .border {
+    border-color: #ccc !important;
+    box-shadow: none !important;
+    background: #fff !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Badges viram texto simples com contorno */
+  .print-area .rounded-full {
+    background: transparent !important;
+    border: 1px solid #666 !important;
+    color: #000 !important;
+  }
+
+  /* Títulos sempre ficam com o próximo bloco */
+  .print-area h1,
+  .print-area h2,
+  .print-area h3 {
+    color: #000 !important;
+    page-break-after: avoid;
+  }
+
+  /* Área principal ocupa a folha inteira */
+  .print-area {
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  /* Configuração de página A4 */
+  @page {
+    size: A4;
+    margin: 14mm 12mm;
+  }
+}

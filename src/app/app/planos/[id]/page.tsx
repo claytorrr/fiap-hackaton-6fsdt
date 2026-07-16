@@ -13,6 +13,7 @@ import {
   Lightbulb,
   ListChecks,
   Home,
+  Pencil,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,8 @@ import {
 } from "@/lib/constants";
 import type { LessonPlanContent } from "@/lib/supabase/types";
 import { DeletePlanButton } from "@/components/delete-plan-button";
+import { DuplicatePlanButton } from "@/components/duplicate-plan-button";
+import { PrintPlanButton } from "@/components/print-plan-button";
 
 type Section = {
   duration_minutes?: number;
@@ -94,16 +97,24 @@ export default async function LessonPlanDetailPage({ params }: PageProps) {
     plan.grade_level;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <div className="flex items-center justify-between gap-3">
+    <div className="print-area mx-auto max-w-4xl space-y-6">
+      <div className="no-print flex flex-wrap items-center justify-between gap-3">
         <Button asChild variant="ghost" size="sm">
           <Link href="/app" className="gap-1">
             <ArrowLeft className="h-4 w-4" aria-hidden />
             Voltar aos planos
           </Link>
         </Button>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge>{STATUS_LABELS[plan.status] ?? plan.status}</Badge>
+          <PrintPlanButton />
+          <DuplicatePlanButton planId={plan.id} />
+          <Button asChild variant="outline" size="sm" className="gap-2">
+            <Link href={`/app/planos/${plan.id}/editar`}>
+              <Pencil className="h-4 w-4" aria-hidden />
+              Editar
+            </Link>
+          </Button>
           <DeletePlanButton planId={plan.id} planTitle={plan.title} />
         </div>
       </div>

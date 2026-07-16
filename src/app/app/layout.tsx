@@ -30,7 +30,7 @@ export default async function AppLayout({
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/20">
-      <header className="border-b bg-background">
+      <header className="border-b bg-background no-print">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
           <Link
             href="/app"
