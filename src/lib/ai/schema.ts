@@ -72,6 +72,26 @@ const assessmentSchema = z.object({
   criteria: z.array(z.string()).default([]),
 });
 
+const workedExampleSchema = z.object({
+  statement: z.string().min(1),
+  solution: z.string().min(1),
+});
+
+const exerciseSchema = z.object({
+  statement: z.string().min(1),
+  answer: z.string().min(1),
+  difficulty: z.enum(["facil", "medio", "dificil"]).default("medio"),
+});
+
+const teachingMaterialSchema = z.object({
+  explanation: z.string().default(""),
+  worked_examples: z.array(workedExampleSchema).default([]),
+  exercises: z.array(exerciseSchema).default([]),
+  homework: z.string().default(""),
+});
+
+export type TeachingMaterial = z.infer<typeof teachingMaterialSchema>;
+
 export const lessonPlanAiResponseSchema = z.object({
   title: z.string().min(1),
   learning_objectives: z.array(z.string()).min(1),
@@ -84,6 +104,12 @@ export const lessonPlanAiResponseSchema = z.object({
   closure: sectionSchema,
   activities: z.array(activitySchema).default([]),
   assessments: z.array(assessmentSchema).default([]),
+  teaching_material: teachingMaterialSchema.default({
+    explanation: "",
+    worked_examples: [],
+    exercises: [],
+    homework: "",
+  }),
 });
 
 export type LessonPlanAiResponse = z.infer<typeof lessonPlanAiResponseSchema>;

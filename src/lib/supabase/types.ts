@@ -24,7 +24,8 @@ export type AssessmentType = "formativa" | "somativa" | "diagnostica";
 
 /**
  * Estrutura do campo jsonb `lesson_plans.content`.
- * O plano é dividido em seções sequenciais com timing e notas.
+ * O plano é dividido em seções sequenciais com timing e notas,
+ * e inclui o material didático pronto para o aluno.
  */
 export interface LessonPlanContent {
   introduction?: {
@@ -41,6 +42,16 @@ export interface LessonPlanContent {
     duration_minutes: number;
     description: string;
     steps?: string[];
+  };
+  teaching_material?: {
+    explanation?: string;
+    worked_examples?: Array<{ statement: string; solution: string }>;
+    exercises?: Array<{
+      statement: string;
+      answer: string;
+      difficulty?: "facil" | "medio" | "dificil";
+    }>;
+    homework?: string;
   };
   notes?: string;
   [key: string]: unknown;

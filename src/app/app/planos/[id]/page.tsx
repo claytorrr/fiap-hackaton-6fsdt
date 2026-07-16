@@ -9,6 +9,10 @@ import {
   ClipboardCheck,
   Sparkles,
   GraduationCap,
+  FileText,
+  Lightbulb,
+  ListChecks,
+  Home,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
@@ -22,6 +26,7 @@ import {
 import {
   ACTIVITY_TYPE_LABELS,
   ASSESSMENT_TYPE_LABELS,
+  DIFFICULTY_LABELS,
   GRADE_LEVELS,
   STATUS_LABELS,
 } from "@/lib/constants";
@@ -68,6 +73,13 @@ export default async function LessonPlanDetailPage({ params }: PageProps) {
   const intro = content.introduction as Section | undefined;
   const dev = content.development as Section | undefined;
   const closure = content.closure as Section | undefined;
+  const material = content.teaching_material;
+  const hasMaterial =
+    material &&
+    ((material.explanation && material.explanation.length > 0) ||
+      (material.worked_examples && material.worked_examples.length > 0) ||
+      (material.exercises && material.exercises.length > 0) ||
+      (material.homework && material.homework.length > 0));
 
   const gradeLabel =
     GRADE_LEVELS.find((g) => g.value === plan.grade_level)?.label ??
@@ -221,6 +233,104 @@ export default async function LessonPlanDetailPage({ params }: PageProps) {
           <SectionBlock title="Fechamento" section={closure} />
         </CardContent>
       </Card>
+
+      {/* Material didático — o que apresentar aos alunos */}
+      {hasMaterial && (
+        <Card className="border-primary/40">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <FileText className="h-5 w-5 text-primary" aria-hidden />
+              Material didático da aula
+            </CardTitle>
+            <CardDescription>
+              Conteúdo pronto para apresentar, projetar ou entregar aos alunos.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-8">
+            {material?.explanation && (
+              <section className="space-y-2">
+                <h3 className="flex items-center gap-2 font-semibold">
+                  <BookOpen className="h-4 w-4 text-primary" aria-hidden />
+                  Conteúdo (texto de apoio)
+                </h3>
+                <div className="prose-sm max-w-none whitespace-pre-line text-sm leading-relaxed text-foreground">
+                  {material.explanation}
+                </div>
+              </section>
+            )}
+
+            {material?.worked_examples && material.worked_examples.length > 0 && (
+              <section className="space-y-3">
+                <h3 className="flex items-center gap-2 font-semibold">
+                  <Lightbulb className="h-4 w-4 text-primary" aria-hidden />
+                  Exemplos resolvidos
+                </h3>
+                <div className="space-y-3">
+                  {material.worked_examples.map((ex, i) => (
+                    <div
+                      key={i}
+                      className="rounded-lg border bg-muted/30 p-4 space-y-2"
+                    >
+                      <p className="text-sm font-semibold">
+                        Exemplo {i + 1}
+                      </p>
+                      <p className="text-sm whitespace-pre-line">
+                        <span className="font-medium">Enunciado: </span>
+                        {ex.statement}
+                      </p>
+                      <div className="text-sm whitespace-pre-line">
+                        <span className="font-medium">Solução: </span>
+                        {ex.solution}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {material?.exercises && material.exercises.length > 0 && (
+              <section className="space-y-3">
+                <h3 className="flex items-center gap-2 font-semibold">
+                  <ListChecks className="h-4 w-4 text-primary" aria-hidden />
+                  Lista de exercícios ({material.exercises.length})
+                </h3>
+                <ol className="list-decimal space-y-3 pl-5">
+                  {material.exercises.map((q, i) => (
+                    <li key={i} className="text-sm leading-relaxed">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <p className="flex-1 whitespace-pre-line">
+                          {q.statement}
+                        </p>
+                        {q.difficulty && (
+                          <Badge variant="outline">
+                            {DIFFICULTY_LABELS[q.difficulty] ?? q.difficulty}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground whitespace-pre-line">
+                        <span className="font-semibold">Gabarito: </span>
+                        {q.answer}
+                      </p>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
+
+            {material?.homework && (
+              <section className="space-y-2">
+                <h3 className="flex items-center gap-2 font-semibold">
+                  <Home className="h-4 w-4 text-primary" aria-hidden />
+                  Para casa
+                </h3>
+                <p className="text-sm leading-relaxed whitespace-pre-line">
+                  {material.homework}
+                </p>
+              </section>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Atividades */}
       {activities && activities.length > 0 && (

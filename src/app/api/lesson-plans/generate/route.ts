@@ -70,7 +70,7 @@ export async function POST(request: Request) {
       model: GROQ_MODEL,
       response_format: { type: "json_object" },
       temperature: 0.5,
-      max_tokens: 4096,
+      max_tokens: 8192,
       messages: [
         { role: "system", content: LESSON_PLAN_SYSTEM_PROMPT },
         { role: "user", content: buildLessonPlanUserPrompt(input) },
@@ -128,6 +128,7 @@ export async function POST(request: Request) {
         introduction: ai.introduction,
         development: ai.development,
         closure: ai.closure,
+        teaching_material: ai.teaching_material,
       },
       status: "draft",
       ai_model: GROQ_MODEL,

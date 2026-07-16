@@ -56,6 +56,12 @@ export const ASSESSMENT_TYPE_LABELS: Record<string, string> = {
   diagnostica: "Diagnóstica",
 };
 
+export const DIFFICULTY_LABELS: Record<string, string> = {
+  facil: "Fácil",
+  medio: "Médio",
+  dificil: "Difícil",
+};
+
 export const STATUS_LABELS: Record<string, string> = {
   draft: "Rascunho",
   published: "Publicado",
