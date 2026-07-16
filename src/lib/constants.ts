@@ -63,7 +63,9 @@ export const DIFFICULTY_LABELS: Record<string, string> = {
 };
 
 export const STATUS_LABELS: Record<string, string> = {
-  draft: "Rascunho",
+  // 'draft' e o valor interno historico; o rotulo evoluiu para 'Ativo'
+  // desde que 'Publicado' foi removido do fluxo (par natural: Ativo <-> Arquivado)
+  draft: "Ativo",
   published: "Publicado",
   archived: "Arquivado",
 };

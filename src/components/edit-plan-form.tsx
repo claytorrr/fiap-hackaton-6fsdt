@@ -53,7 +53,7 @@ type FormValues = {
 };
 
 const STATUS_OPTIONS: Array<{ value: FormValues["status"]; label: string }> = [
-  { value: "draft", label: "Rascunho" },
+  { value: "draft", label: "Ativo" },
   { value: "archived", label: "Arquivado" },
 ];
 
