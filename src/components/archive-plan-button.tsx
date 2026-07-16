@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 interface ArchivePlanButtonProps {
   planId: string;
   currentStatus: string;
+  /** 'full' mostra rotulo, 'icon' so o icone (uso em cards de lista) */
+  variant?: "full" | "icon";
 }
 
 /**
@@ -18,6 +20,7 @@ interface ArchivePlanButtonProps {
 export function ArchivePlanButton({
   planId,
   currentStatus,
+  variant = "full",
 }: ArchivePlanButtonProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -27,7 +30,9 @@ export function ArchivePlanButton({
   const label = isArchived ? "Desarquivar" : "Arquivar";
   const Icon = isArchived ? ArchiveRestore : Archive;
 
-  function handleClick() {
+  function handleClick(e?: React.MouseEvent) {
+    e?.preventDefault();
+    e?.stopPropagation();
     startTransition(async () => {
       const toastId = toast.loading(
         isArchived ? "Desarquivando..." : "Arquivando...",
@@ -52,6 +57,27 @@ export function ArchivePlanButton({
         toast.error(message, { id: toastId });
       }
     });
+  }
+
+  if (variant === "icon") {
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label={label}
+        title={label}
+        onClick={handleClick}
+        disabled={isPending}
+        className="text-muted-foreground hover:text-primary"
+      >
+        {isPending ? (
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+        ) : (
+          <Icon className="h-4 w-4" aria-hidden />
+        )}
+      </Button>
+    );
   }
 
   return (
