@@ -1,0 +1,378 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import {
+  ArrowLeft,
+  BookOpen,
+  Clock,
+  Target,
+  Users,
+  ClipboardCheck,
+  Sparkles,
+  GraduationCap,
+} from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ACTIVITY_TYPE_LABELS,
+  ASSESSMENT_TYPE_LABELS,
+  GRADE_LEVELS,
+  STATUS_LABELS,
+} from "@/lib/constants";
+import type { LessonPlanContent } from "@/lib/supabase/types";
+
+type Section = {
+  duration_minutes?: number;
+  description?: string;
+  steps?: string[];
+};
+
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default async function LessonPlanDetailPage({ params }: PageProps) {
+  const { id } = await params;
+  const supabase = await createClient();
+
+  const { data: plan } = await supabase
+    .from("lesson_plans")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (!plan) {
+    notFound();
+  }
+
+  const [{ data: activities }, { data: assessments }] = await Promise.all([
+    supabase
+      .from("activities")
+      .select("*")
+      .eq("lesson_plan_id", id)
+      .order("position", { ascending: true }),
+    supabase
+      .from("assessments")
+      .select("*")
+      .eq("lesson_plan_id", id)
+      .order("created_at", { ascending: true }),
+  ]);
+
+  const content = (plan.content ?? {}) as LessonPlanContent;
+  const intro = content.introduction as Section | undefined;
+  const dev = content.development as Section | undefined;
+  const closure = content.closure as Section | undefined;
+
+  const gradeLabel =
+    GRADE_LEVELS.find((g) => g.value === plan.grade_level)?.label ??
+    plan.grade_level;
+
+  return (
+    <div className="mx-auto max-w-4xl space-y-6">
+      <div className="flex items-center justify-between gap-3">
+        <Button asChild variant="ghost" size="sm">
+          <Link href="/app" className="gap-1">
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            Voltar aos planos
+          </Link>
+        </Button>
+        <Badge>{STATUS_LABELS[plan.status] ?? plan.status}</Badge>
+      </div>
+
+      {/* Cabeçalho */}
+      <header className="space-y-3">
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+          {plan.title}
+        </h1>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <BookOpen className="h-4 w-4" aria-hidden />
+            {plan.discipline}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <GraduationCap className="h-4 w-4" aria-hidden />
+            {gradeLabel}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Clock className="h-4 w-4" aria-hidden />
+            {plan.duration_minutes} min
+          </span>
+          {plan.ai_model && (
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="h-4 w-4" aria-hidden />
+              {plan.ai_model}
+            </span>
+          )}
+        </div>
+      </header>
+
+      {/* Tema */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Tema da aula</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="leading-relaxed">{plan.topic}</p>
+        </CardContent>
+      </Card>
+
+      {/* Objetivos + BNCC lado a lado */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Target className="h-5 w-5 text-primary" aria-hidden />
+              Objetivos de aprendizagem
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed">
+              {plan.learning_objectives.map((o, i) => (
+                <li key={i}>{o}</li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Habilidades BNCC</CardTitle>
+            <CardDescription>
+              {plan.bncc_skills.length > 0
+                ? "Códigos alinhados ao tema"
+                : "Nenhuma habilidade específica mapeada"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {plan.bncc_skills.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {plan.bncc_skills.map((s) => (
+                  <Badge key={s} variant="outline">
+                    {s}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">—</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Pré-requisitos e metodologia */}
+      {(plan.prerequisites || plan.methodology) && (
+        <div className="grid gap-4 md:grid-cols-2">
+          {plan.prerequisites && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Pré-requisitos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm leading-relaxed">{plan.prerequisites}</p>
+              </CardContent>
+            </Card>
+          )}
+          {plan.methodology && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Metodologia</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm leading-relaxed">{plan.methodology}</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* Recursos */}
+      {plan.resources.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Recursos necessários</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="grid grid-cols-1 gap-1.5 pl-5 text-sm sm:grid-cols-2 list-disc">
+              {plan.resources.map((r, i) => (
+                <li key={i}>{r}</li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Estrutura da aula */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Estrutura da aula</CardTitle>
+          <CardDescription>
+            Sequência didática dividida em três momentos.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <SectionBlock title="Introdução" section={intro} />
+          <SectionBlock title="Desenvolvimento" section={dev} />
+          <SectionBlock title="Fechamento" section={closure} />
+        </CardContent>
+      </Card>
+
+      {/* Atividades */}
+      {activities && activities.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Users className="h-5 w-5 text-primary" aria-hidden />
+              Atividades ({activities.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {activities.map((a, i) => (
+              <div
+                key={a.id}
+                className="rounded-lg border bg-muted/30 p-4 space-y-2"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="font-semibold">
+                    {i + 1}. {a.title}
+                  </h3>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    {a.activity_type && (
+                      <Badge variant="outline">
+                        {ACTIVITY_TYPE_LABELS[a.activity_type] ??
+                          a.activity_type}
+                      </Badge>
+                    )}
+                    {a.duration_minutes && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" aria-hidden />
+                        {a.duration_minutes} min
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {a.description && (
+                  <p className="text-sm leading-relaxed">{a.description}</p>
+                )}
+                {a.instructions && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase text-muted-foreground">
+                      Instruções para o professor
+                    </p>
+                    <p className="text-sm leading-relaxed whitespace-pre-line">
+                      {a.instructions}
+                    </p>
+                  </div>
+                )}
+                {a.resources.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {a.resources.map((r, ri) => (
+                      <Badge key={ri} variant="outline">
+                        {r}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Avaliações */}
+      {assessments && assessments.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <ClipboardCheck className="h-5 w-5 text-primary" aria-hidden />
+              Avaliações
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {assessments.map((a) => (
+              <div
+                key={a.id}
+                className="rounded-lg border bg-muted/30 p-4 space-y-2"
+              >
+                <div className="flex items-center gap-2">
+                  <Badge>
+                    {ASSESSMENT_TYPE_LABELS[a.type] ?? a.type}
+                  </Badge>
+                </div>
+                <p className="text-sm leading-relaxed">{a.description}</p>
+                {a.criteria.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase text-muted-foreground">
+                      Critérios
+                    </p>
+                    <ul className="list-disc pl-5 text-sm space-y-1">
+                      {a.criteria.map((c, ci) => (
+                        <li key={ci}>{c}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+// ------------------- Componentes locais -------------------
+
+function SectionBlock({
+  title,
+  section,
+}: {
+  title: string;
+  section: Section | undefined;
+}) {
+  if (!section?.description) {
+    return null;
+  }
+  return (
+    <div className="border-l-2 border-primary/40 pl-4 space-y-2">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-primary">{title}</h3>
+        {section.duration_minutes && (
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Clock className="h-3 w-3" aria-hidden />
+            {section.duration_minutes} min
+          </span>
+        )}
+      </div>
+      <p className="text-sm leading-relaxed">{section.description}</p>
+      {section.steps && section.steps.length > 0 && (
+        <ul className="list-decimal pl-5 text-sm space-y-1">
+          {section.steps.map((s, i) => (
+            <li key={i}>{s}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function Badge({
+  children,
+  variant = "default",
+}: {
+  children: React.ReactNode;
+  variant?: "default" | "outline";
+}) {
+  const base =
+    "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium";
+  const styles =
+    variant === "outline"
+      ? "border border-input text-foreground"
+      : "bg-primary/10 text-primary";
+  return <span className={`${base} ${styles}`}>{children}</span>;
+}
