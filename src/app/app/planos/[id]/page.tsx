@@ -31,6 +31,7 @@ import {
   STATUS_LABELS,
 } from "@/lib/constants";
 import type { LessonPlanContent } from "@/lib/supabase/types";
+import { DeletePlanButton } from "@/components/delete-plan-button";
 
 type Section = {
   duration_minutes?: number;
@@ -101,7 +102,10 @@ export default async function LessonPlanDetailPage({ params }: PageProps) {
             Voltar aos planos
           </Link>
         </Button>
-        <Badge>{STATUS_LABELS[plan.status] ?? plan.status}</Badge>
+        <div className="flex items-center gap-2">
+          <Badge>{STATUS_LABELS[plan.status] ?? plan.status}</Badge>
+          <DeletePlanButton planId={plan.id} planTitle={plan.title} />
+        </div>
       </div>
 
       {/* Cabeçalho */}

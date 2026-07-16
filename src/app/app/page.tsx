@@ -5,10 +5,9 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
+import { PlanCard } from "@/components/plan-card";
 
 /**
  * Dashboard: lista os planos do professor logado e oferece o CTA
@@ -68,26 +67,7 @@ export default async function DashboardPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => (
-            <Link key={plan.id} href={`/app/planos/${plan.id}`}>
-              <Card className="h-full transition hover:border-primary/40 hover:shadow-md">
-                <CardHeader>
-                  <CardTitle className="line-clamp-2 text-lg">
-                    {plan.title}
-                  </CardTitle>
-                  <CardDescription>
-                    {plan.discipline} · {plan.grade_level}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>{plan.duration_minutes} min</span>
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
-                      {plan.status}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+            <PlanCard key={plan.id} plan={plan} />
           ))}
         </div>
       )}
