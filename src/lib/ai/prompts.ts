@@ -1,7 +1,7 @@
 import type { GenerateLessonPlanRequest } from "./schema";
 import { GRADE_LEVELS } from "@/lib/constants";
 
-export const PROMPT_VERSION = "2026-07-16.v3";
+export const PROMPT_VERSION = "2026-07-16.v4";
 
 /**
  * System prompt: papel do modelo + regras de formato.
@@ -34,8 +34,17 @@ ADAPTE À ETAPA:
 - Ensino Médio e EJA: densidade conceitual, autonomia, conexão com vestibular/ENEM e mercado de trabalho quando cabível.
 
 REGRAS DO MATERIAL DIDÁTICO (teaching_material):
-- explanation: texto expositivo do conteúdo escrito PARA O ALUNO (tom didático da área). Use \\n\\n para separar parágrafos. Este é o "texto de apoio" que o professor pode ler, projetar ou entregar impresso.
-- guided_examples: 2 a 4 exemplos ou análises comentadas. Em Matemática/Ciências, use "exemplo resolvido passo a passo"; em Linguagens, use "leitura/produção modelo comentada"; em Humanas, use "análise comentada de fonte, conceito ou situação".
+- explanation: TEXTO DE APOIO EXTENSO escrito PARA O ALUNO. Esta é a peça mais importante do material — o professor vai ler, projetar ou entregar impresso. NÃO é um resumo. NÃO é um sumário. É um texto didático de VERDADE.
+  * Tamanho: entre 600 e 1200 palavras (4 a 8 parágrafos densos).
+  * Estrutura obrigatória (nesta ordem, sem títulos, apenas parágrafos separados por \\n\\n):
+      1) Contextualização / gancho: por que este assunto importa, situação do cotidiano ou pergunta provocativa.
+      2) Definição clara dos conceitos centrais, com o vocabulário da área.
+      3) Desenvolvimento: aprofundamento com no mínimo 2 exemplos INTERNOS ao texto (dentro dos próprios parágrafos, ilustrando os conceitos).
+      4) Conexão com o cotidiano do aluno da rede pública brasileira (situações reais, referências culturais acessíveis).
+      5) Síntese final: recapitula os pontos-chave em 3-5 linhas.
+  * Linguagem adequada à etapa (ver bloco 'ADAPTE À ETAPA' acima). Evite jargão desnecessário.
+  * Use \\n\\n para separar parágrafos. NÃO use marcadores, listas, títulos ou markdown dentro deste campo.
+- guided_examples: 2 a 4 exemplos ou análises comentadas SEPARADOS do texto de apoio. Em Matemática/Ciências, use "exemplo resolvido passo a passo"; em Linguagens, use "leitura/produção modelo comentada"; em Humanas, use "análise comentada de fonte, conceito ou situação".
 - exercises: 4 a 8 questões/atividades variadas em dificuldade. Cada uma traz enunciado, resposta esperada (ou modelo/critérios de correção quando discursiva) e nível ("facil" | "medio" | "dificil"). Misture os níveis. Em Linguagens e Humanas, o campo answer pode conter "resposta esperada / critérios: ..." em vez de um único valor.
 - homework: 1 parágrafo com uma tarefa clara para casa, coerente com o conteúdo dado.
 
@@ -69,7 +78,7 @@ SCHEMA JSON ESPERADO (chaves exatas):
     }
   ],
   "teaching_material": {
-    "explanation": "texto didático longo escrito para o aluno, com parágrafos separados por \\n\\n",
+    "explanation": "texto didático LONGO (600-1200 palavras, 4-8 parágrafos densos) escrito para o aluno, seguindo a estrutura obrigatória: contexto -> definição -> desenvolvimento com exemplos internos -> conexão cotidiano -> síntese. Parágrafos separados por \\n\\n",
     "guided_examples": [
       { "statement": "enunciado / trecho / situação analisada", "solution": "resolução ou análise comentada passo a passo" }
     ],
