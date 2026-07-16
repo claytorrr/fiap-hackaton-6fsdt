@@ -74,10 +74,17 @@ export default async function LessonPlanDetailPage({ params }: PageProps) {
   const dev = content.development as Section | undefined;
   const closure = content.closure as Section | undefined;
   const material = content.teaching_material;
+  // Aceita tanto o nome atual (guided_examples) quanto o legado (worked_examples)
+  // para não quebrar planos gerados antes da v3 do prompt.
+  const materialLegacy = material as
+    | { worked_examples?: Array<{ statement: string; solution: string }> }
+    | undefined;
+  const examples =
+    material?.guided_examples ?? materialLegacy?.worked_examples ?? [];
   const hasMaterial =
     material &&
     ((material.explanation && material.explanation.length > 0) ||
-      (material.worked_examples && material.worked_examples.length > 0) ||
+      examples.length > 0 ||
       (material.exercises && material.exercises.length > 0) ||
       (material.homework && material.homework.length > 0));
 
@@ -259,14 +266,14 @@ export default async function LessonPlanDetailPage({ params }: PageProps) {
               </section>
             )}
 
-            {material?.worked_examples && material.worked_examples.length > 0 && (
+            {examples.length > 0 && (
               <section className="space-y-3">
                 <h3 className="flex items-center gap-2 font-semibold">
                   <Lightbulb className="h-4 w-4 text-primary" aria-hidden />
-                  Exemplos resolvidos
+                  Exemplos comentados
                 </h3>
                 <div className="space-y-3">
-                  {material.worked_examples.map((ex, i) => (
+                  {examples.map((ex, i) => (
                     <div
                       key={i}
                       className="rounded-lg border bg-muted/30 p-4 space-y-2"
@@ -279,7 +286,7 @@ export default async function LessonPlanDetailPage({ params }: PageProps) {
                         {ex.statement}
                       </p>
                       <div className="text-sm whitespace-pre-line">
-                        <span className="font-medium">Solução: </span>
+                        <span className="font-medium">Análise/Solução: </span>
                         {ex.solution}
                       </div>
                     </div>
@@ -292,7 +299,7 @@ export default async function LessonPlanDetailPage({ params }: PageProps) {
               <section className="space-y-3">
                 <h3 className="flex items-center gap-2 font-semibold">
                   <ListChecks className="h-4 w-4 text-primary" aria-hidden />
-                  Lista de exercícios ({material.exercises.length})
+                  Questões / atividades ({material.exercises.length})
                 </h3>
                 <ol className="list-decimal space-y-3 pl-5">
                   {material.exercises.map((q, i) => (
@@ -308,7 +315,7 @@ export default async function LessonPlanDetailPage({ params }: PageProps) {
                         )}
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground whitespace-pre-line">
-                        <span className="font-semibold">Gabarito: </span>
+                        <span className="font-semibold">Resposta esperada: </span>
                         {q.answer}
                       </p>
                     </li>

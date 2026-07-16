@@ -85,7 +85,7 @@ const exerciseSchema = z.object({
 
 const teachingMaterialSchema = z.object({
   explanation: z.string().default(""),
-  worked_examples: z.array(workedExampleSchema).default([]),
+  guided_examples: z.array(workedExampleSchema).default([]),
   exercises: z.array(exerciseSchema).default([]),
   homework: z.string().default(""),
 });
@@ -106,7 +106,7 @@ export const lessonPlanAiResponseSchema = z.object({
   assessments: z.array(assessmentSchema).default([]),
   teaching_material: teachingMaterialSchema.default({
     explanation: "",
-    worked_examples: [],
+    guided_examples: [],
     exercises: [],
     homework: "",
   }),

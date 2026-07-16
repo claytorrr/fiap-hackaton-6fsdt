@@ -45,7 +45,7 @@ export interface LessonPlanContent {
   };
   teaching_material?: {
     explanation?: string;
-    worked_examples?: Array<{ statement: string; solution: string }>;
+    guided_examples?: Array<{ statement: string; solution: string }>;
     exercises?: Array<{
       statement: string;
       answer: string;
